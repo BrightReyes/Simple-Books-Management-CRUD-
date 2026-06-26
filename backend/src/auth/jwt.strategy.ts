@@ -17,7 +17,8 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
     super({
       jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
       ignoreExpiration: false,
-      secretOrKey: process.env['JWT_SECRET'] || 'simple-books-jwt-secret-key-2024',
+      secretOrKey:
+        process.env['JWT_SECRET'] || 'simple-books-jwt-secret-key-2024',
     });
   }
 
@@ -28,7 +29,9 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
     });
 
     if (!user) {
-      this.logger.warn(`JWT validation failed: User ID ${payload.sub} not found in database`);
+      this.logger.warn(
+        `JWT validation failed: User ID ${payload.sub} not found in database`,
+      );
       throw new UnauthorizedException();
     }
 

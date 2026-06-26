@@ -32,7 +32,9 @@ export class AuthService {
       throw new UnauthorizedException('Invalid username or password');
     }
 
-    this.logger.log(`User ${username} validated successfully. Generating JWT token.`);
+    this.logger.log(
+      `User ${username} validated successfully. Generating JWT token.`,
+    );
     // Generate JWT token
     const payload = { sub: user.id, username: user.username, role: user.role };
     const accessToken = this.jwtService.sign(payload);
@@ -49,7 +51,7 @@ export class AuthService {
 
   async signup(username: string, password: string) {
     this.logger.log(`Signing up new student: ${username}`);
-    
+
     // Check if user already exists
     const existingUser = await this.prisma.user.findUnique({
       where: { username },

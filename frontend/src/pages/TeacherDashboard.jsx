@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Navbar from '../components/Navbar';
 import BookCard from '../components/BookCard';
@@ -6,12 +6,23 @@ import BookModal from '../components/BookModal';
 import { useBooks } from '../hooks/useBooks';
 
 export default function TeacherDashboard() {
-  const { books, loading, error } = useBooks(true);
+  const { books, loading, error, refetch: fetchBooks } = useBooks(true);
   const navigate = useNavigate();
 
   const [searchQuery, setSearchQuery] = useState('');
   const [sortOption, setSortOption] = useState('newest');
   const [selectedBook, setSelectedBook] = useState(null);
+
+  // Keep selectedBook synced with the latest data from 'books' array
+  // so if an assignment is added, the modal updates automatically.
+  useEffect(() => {
+    if (selectedBook) {
+      const updatedBook = books.find(b => b.id === selectedBook.id);
+      if (updatedBook && updatedBook !== selectedBook) {
+        setSelectedBook(updatedBook);
+      }
+    }
+  }, [books, selectedBook]);
 
   const filteredAndSortedBooks = useMemo(() => {
     let result = [...books];
@@ -132,6 +143,7 @@ export default function TeacherDashboard() {
           book={selectedBook} 
           role="teacher" 
           onClose={() => setSelectedBook(null)} 
+          onAssignmentAdded={fetchBooks}
         />
       )}
     </>

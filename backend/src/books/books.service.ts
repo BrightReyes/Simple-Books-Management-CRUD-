@@ -48,7 +48,10 @@ export class BooksService {
     });
   }
 
-  async update(id: number, updateBookDto: { title?: string; description?: string }) {
+  async update(
+    id: number,
+    updateBookDto: { title?: string; description?: string },
+  ) {
     return this.prisma.book.update({
       where: { id },
       data: updateBookDto,

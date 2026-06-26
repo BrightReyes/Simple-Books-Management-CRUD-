@@ -23,7 +23,10 @@ async function bootstrap() {
   );
 
   // Serve uploaded files as static assets
-  app.use('/uploads', require('express').static(join(process.cwd(), 'uploads')));
+  app.use(
+    '/uploads',
+    require('express').static(join(process.cwd(), 'uploads')),
+  );
 
   const port = process.env['PORT'] || 3000;
   await app.listen(port);
