@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, ConflictException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateBookDto } from './dto/create-book.dto';
 
@@ -7,19 +7,25 @@ export class BooksService {
   constructor(private prisma: PrismaService) {}
 
   async create(createBookDto: CreateBookDto, teacherId: number) {
-    return this.prisma.book.create({
-      data: {
-        title: createBookDto.title,
-        description: createBookDto.description,
-        coverImage: createBookDto.coverImage || null,
-        createdByTeacherId: teacherId,
-      },
-    });
+    try {
+      return await this.prisma.book.create({
+        data: {
+          title: createBookDto.title,
+          description: createBookDto.description,
+          coverImage: createBookDto.coverImage || null,
+          createdByTeacherId: teacherId,
+        },
+      });
+    } catch (error) {
+      if (error.code === 'P2002') {
+        throw new ConflictException('A book with this title already exists.');
+      }
+      throw error;
+    }
   }
 
-  async findAllByTeacher(teacherId: number) {
+  async findAllWithAssignments() {
     return this.prisma.book.findMany({
-      where: { createdByTeacherId: teacherId },
       orderBy: { id: 'desc' },
       include: {
         assignments: {
@@ -27,6 +33,7 @@ export class BooksService {
             student: { select: { id: true, username: true } },
           },
         },
+        teacher: { select: { id: true, username: true } },
       },
     });
   }

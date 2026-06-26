@@ -24,10 +24,11 @@ export class AssignmentsController {
   @Post()
   @UseGuards(RolesGuard)
   @Roles(Role.TEACHER)
-  async assignBook(@Body() assignBookDto: AssignBookDto) {
+  async assignBook(@Body() assignBookDto: AssignBookDto, @Request() req: any) {
     return this.assignmentsService.assignBook(
       assignBookDto.studentId,
       assignBookDto.bookId,
+      req.user.id,
     );
   }
 
@@ -51,7 +52,8 @@ export class AssignmentsController {
   async removeAssignment(
     @Param('studentId', ParseIntPipe) studentId: number,
     @Param('bookId', ParseIntPipe) bookId: number,
+    @Request() req: any,
   ) {
-    return this.assignmentsService.removeAssignment(studentId, bookId);
+    return this.assignmentsService.removeAssignment(studentId, bookId, req.user.id);
   }
 }

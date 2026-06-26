@@ -1,4 +1,4 @@
-import { Controller, Get, UseGuards, Request } from '@nestjs/common';
+import { Controller, Get, Delete, Param, ParseIntPipe, UseGuards, Request } from '@nestjs/common';
 import { Role } from '@prisma/client';
 import { UsersService } from './users.service';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
@@ -20,5 +20,12 @@ export class UsersController {
   @Get('profile')
   async getProfile(@Request() req: any) {
     return this.usersService.findById(req.user.id);
+  }
+
+  @Delete(':id')
+  @UseGuards(RolesGuard)
+  @Roles(Role.TEACHER)
+  async deleteStudent(@Param('id', ParseIntPipe) id: number) {
+    return this.usersService.deleteStudent(id);
   }
 }

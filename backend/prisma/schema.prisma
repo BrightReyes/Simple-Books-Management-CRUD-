@@ -21,15 +21,16 @@ model User {
   password String
   role     Role
 
-  books       Book[]           @relation("TeacherBooks")
-  assignments BookAssignment[] @relation("StudentAssignments")
+  books               Book[]           @relation("TeacherBooks")
+  assignments         BookAssignment[] @relation("StudentAssignments")
+  createdAssignments  BookAssignment[] @relation("TeacherAssignments")
 
   @@map("users")
 }
 
 model Book {
   id                 Int    @id @default(autoincrement())
-  title              String
+  title              String @unique
   description        String
   coverImage         String? @map("cover_image")
   createdByTeacherId Int     @map("created_by_teacher_id")
@@ -41,11 +42,13 @@ model Book {
 }
 
 model BookAssignment {
-  studentId Int @map("student_id")
-  bookId    Int @map("book_id")
+  studentId           Int @map("student_id")
+  bookId              Int @map("book_id")
+  assignedByTeacherId Int @default(1) @map("assigned_by_teacher_id")
 
-  student User @relation("StudentAssignments", fields: [studentId], references: [id])
-  book    Book @relation(fields: [bookId], references: [id])
+  student           User @relation("StudentAssignments", fields: [studentId], references: [id])
+  book              Book @relation(fields: [bookId], references: [id])
+  assignedByTeacher User @relation("TeacherAssignments", fields: [assignedByTeacherId], references: [id])
 
   @@id([studentId, bookId])
   @@map("book_assignments")

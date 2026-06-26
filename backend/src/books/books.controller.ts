@@ -66,8 +66,8 @@ export class BooksController {
   @Get()
   @UseGuards(RolesGuard)
   @Roles(Role.TEACHER)
-  async findAll(@Request() req: any) {
-    return this.booksService.findAllByTeacher(req.user.id);
+  async findAll() {
+    return this.booksService.findAllWithAssignments();
   }
 
   @Get('all')

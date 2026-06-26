@@ -46,6 +46,12 @@ export default function Navbar() {
             >
               Manage Books
             </button>
+            <button
+              className={`navbar__link ${isActive('/teacher/manage-users') ? 'active' : ''}`}
+              onClick={() => navigate('/teacher/manage-users')}
+            >
+              Manage Users
+            </button>
           </>
         )}
       </div>

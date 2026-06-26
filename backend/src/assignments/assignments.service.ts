@@ -1,11 +1,17 @@
-import { Injectable, ConflictException } from '@nestjs/common';
+import { Injectable, ConflictException, ForbiddenException, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 
 @Injectable()
 export class AssignmentsService {
   constructor(private prisma: PrismaService) {}
 
-  async assignBook(studentId: number, bookId: number) {
+  async assignBook(studentId: number, bookId: number, teacherId: number) {
+    // Check if book exists
+    const book = await this.prisma.book.findUnique({ where: { id: bookId } });
+    if (!book) {
+      throw new NotFoundException('Book not found');
+    }
+
     // Check for duplicate assignment
     const existing = await this.prisma.bookAssignment.findUnique({
       where: {
@@ -19,8 +25,13 @@ export class AssignmentsService {
       );
     }
 
+    // Create assignment
     return this.prisma.bookAssignment.create({
-      data: { studentId, bookId },
+      data: {
+        studentId,
+        bookId,
+        assignedByTeacherId: teacherId,
+      },
       include: {
         student: { select: { id: true, username: true } },
         book: { select: { id: true, title: true } },
@@ -55,7 +66,22 @@ export class AssignmentsService {
     });
   }
 
-  async removeAssignment(studentId: number, bookId: number) {
+  async removeAssignment(studentId: number, bookId: number, teacherId: number) {
+    // Check if assignment exists and verify ownership
+    const assignment = await this.prisma.bookAssignment.findUnique({
+      where: {
+        studentId_bookId: { studentId, bookId },
+      },
+    });
+
+    if (!assignment) {
+      throw new NotFoundException('Assignment not found');
+    }
+
+    if (assignment.assignedByTeacherId !== teacherId) {
+      throw new ForbiddenException('You can only unassign books that you specifically assigned.');
+    }
+
     try {
       return await this.prisma.bookAssignment.delete({
         where: {

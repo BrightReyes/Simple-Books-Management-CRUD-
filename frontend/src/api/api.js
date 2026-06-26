@@ -42,10 +42,13 @@ export const login = (username, password) =>
   api.post('/auth/login', { username, password });
 export const signup = (username, password) =>
   api.post('/auth/signup', { username, password });
+export const createTeacher = (username, password) =>
+  api.post('/auth/create-teacher', { username, password });
 
 // ---- Users ----
 export const getStudents = () => api.get('/users/students');
 export const getProfile = () => api.get('/users/profile');
+export const deleteUser = (id) => api.delete(`/users/${id}`);
 
 // ---- Books ----
 export const getBooks = () => api.get('/books');

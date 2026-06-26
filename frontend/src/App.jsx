@@ -7,6 +7,7 @@ import TeacherDashboard from './pages/TeacherDashboard';
 import CreateBookPage from './pages/CreateBookPage';
 import AssignBookPage from './pages/AssignBookPage';
 import ManageBooksPage from './pages/ManageBooksPage';
+import ManageUsersPage from './pages/ManageUsersPage';
 import StudentDashboard from './pages/StudentDashboard';
 
 function App() {
@@ -48,6 +49,14 @@ function App() {
             element={
               <ProtectedRoute allowedRole="TEACHER">
                 <ManageBooksPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/teacher/manage-users"
+            element={
+              <ProtectedRoute allowedRole="TEACHER">
+                <ManageUsersPage />
               </ProtectedRoute>
             }
           />

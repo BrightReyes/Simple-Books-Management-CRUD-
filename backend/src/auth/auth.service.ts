@@ -81,4 +81,39 @@ export class AuthService {
       message: 'Signup successful. You can now log in.',
     };
   }
+
+  async createTeacher(username: string, password: string) {
+    this.logger.log(`Creating new teacher account: ${username}`);
+
+    const existingUser = await this.prisma.user.findUnique({
+      where: { username },
+    });
+
+    if (existingUser) {
+      this.logger.warn(`Teacher creation failed: Username ${username} already exists`);
+      throw new UnauthorizedException('Username is already taken');
+    }
+
+    const saltRounds = 10;
+    const hashedPassword = await bcrypt.hash(password, saltRounds);
+
+    const newTeacher = await this.prisma.user.create({
+      data: {
+        username,
+        password: hashedPassword,
+        role: 'TEACHER',
+      },
+    });
+
+    this.logger.log(`Teacher ${username} created successfully.`);
+    return {
+      success: true,
+      message: 'Teacher account created successfully.',
+      user: {
+        id: newTeacher.id,
+        username: newTeacher.username,
+        role: newTeacher.role,
+      }
+    };
+  }
 }
