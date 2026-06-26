@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Navbar from '../components/Navbar';
 import { useBooks } from '../hooks/useBooks';
@@ -12,6 +12,39 @@ export default function ManageBooksPage() {
   const [editingBookId, setEditingBookId] = useState(null);
   const [editTitle, setEditTitle] = useState('');
   const [editDescription, setEditDescription] = useState('');
+
+  const [searchQuery, setSearchQuery] = useState('');
+  const [sortOption, setSortOption] = useState('newest');
+
+  const filteredAndSortedBooks = useMemo(() => {
+    let result = [...books];
+
+    if (searchQuery.trim()) {
+      const query = searchQuery.toLowerCase();
+      result = result.filter(
+        (b) =>
+          b.title.toLowerCase().includes(query) ||
+          b.description.toLowerCase().includes(query)
+      );
+    }
+
+    switch (sortOption) {
+      case 'title-asc':
+        result.sort((a, b) => a.title.localeCompare(b.title));
+        break;
+      case 'title-desc':
+        result.sort((a, b) => b.title.localeCompare(a.title));
+        break;
+      case 'oldest':
+        result.sort((a, b) => a.id - b.id);
+        break;
+      case 'newest':
+      default:
+        result.sort((a, b) => b.id - a.id);
+        break;
+    }
+    return result;
+  }, [books, searchQuery, sortOption]);
 
   const [updating, setUpdating] = useState(false);
   const [actionError, setActionError] = useState('');
@@ -90,6 +123,28 @@ export default function ManageBooksPage() {
         </div>
 
         <div className="pill-container">
+          <div className="filter-bar">
+            <input
+              type="text"
+              className="form-group__input"
+              placeholder="Search books by title or description..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              style={{ flex: 1, marginBottom: 0 }}
+            />
+            <select
+              className="form-group__select"
+              value={sortOption}
+              onChange={(e) => setSortOption(e.target.value)}
+              style={{ width: 'auto', marginBottom: 0 }}
+            >
+              <option value="newest">Newest First</option>
+              <option value="oldest">Oldest First</option>
+              <option value="title-asc">Title (A-Z)</option>
+              <option value="title-desc">Title (Z-A)</option>
+            </select>
+          </div>
+
           {error && <div className="alert alert--error">{error}</div>}
           {actionError && <div className="alert alert--error">{actionError}</div>}
 
@@ -101,9 +156,13 @@ export default function ManageBooksPage() {
             <div className="empty-state">
               <p className="empty-state__text">No books found</p>
             </div>
+          ) : filteredAndSortedBooks.length === 0 ? (
+            <div className="empty-state">
+              <p className="empty-state__text">No matching books found</p>
+            </div>
           ) : (
             <div className="manage-list" style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
-              {books.map((book) => (
+              {filteredAndSortedBooks.map((book) => (
                 <div key={book.id} className="manage-card" style={{ background: 'var(--bg-card)', padding: '1.5rem', borderRadius: 'var(--radius-lg)', border: '1px solid var(--border-color)' }}>
 
                   {editingBookId === book.id ? (
